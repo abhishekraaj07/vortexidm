@@ -1,0 +1,48 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Dependencies
+        run: |
+          pip install requests pyinstaller yt-dlp
+
+      - name: Build Standalone EXE
+        run: |
+          pyinstaller --onefile --noconsole --name "VORTEX" --hidden-import vortex_idm_ui --hidden-import vortex_engine --hidden-import yt_dlp vortex.py
+
+      - name: Publish Release with VORTEX.exe
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: "VORTEX IDM v1.0.0 (Windows Standalone)"
+          body: |
+            ### ⚡ VORTEX Download Accelerator (IDM Dark Edition)
+            
+            - **16x Parallel Multi-threaded Streams**
+            - **YouTube, Instagram, Twitter/X Video Extractor**
+            - **Deep OLED Black Theme**
+            - **Zero-Merge Instant Completion**
+            - **100% Free Forever (No 30-day Trial limit)**
+            
+            Download `VORTEX.exe` below and run directly on Windows!
+          files: dist/VORTEX.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
